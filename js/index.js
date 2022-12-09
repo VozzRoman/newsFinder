@@ -3,32 +3,61 @@
 const inputEl = document.querySelector('.enter-input');
 const buttonEl = document.querySelector('.button');
 const containerNews = document.querySelector('.container-news');
+const loadButton = document.querySelector('.load-button');
+
+
+
 
 const API_KEY = '758eaee05362425590906fb4540c32ad';
+
+let page = 1;
+const pageSize = 10;
+let totalPage = null;
+
+loadButton.addEventListener('click', onLoadClick);
+
+function onLoadClick() {
+
+	if (page < totalPage) {
+		getFetch(searchQery, pageSize, page);
+	} else {
+		alert('You reached maximum result')
+	}
+	
+	page = Number(page) + 1;
+}
 
 buttonEl.addEventListener('click', onButtonSearch);
 
 let searchQery = '';
 function onButtonSearch(e) {
     e.preventDefault();
-   inputEl.value.innerHTML = '';
+	if (Number(page) < totalPage) {
+			loadButton.classList.add('active');
+	} else {
+		loadButton.classList.remove('active');
+		}
     searchQery = inputEl.value;
-    
     console.log(searchQery);
-    getFetch(searchQery);
-    
+	getFetch(searchQery, pageSize, page);
+	clearContainer();
+	inputEl.value = '';
 };
 
-function getFetch(query) {
-    const urlApi = `https://newsapi.org/v2/everything?q=${query}&from=2022-12-01&apiKey=${API_KEY}`
+function getFetch(query, size, number) {
+    const urlApi = `https://newsapi.org/v2/everything?q=${query}&from=2022-12-01&apiKey=${API_KEY}&pageSize=${size}&page=${number}`
     fetch(urlApi)
         .then(response => {
             return response.json()
         })
-        .then(response => renderMarkUp(response.articles))
+		 .then(response => {
+			 
+			 renderMarkUp(response.articles);
+			 calculateTotalPage(response.totalResults);
+		 })
         .catch(error => console.log(error));
 
-   
+
 }
 
 function renderMarkUp(articles) {
@@ -47,3 +76,14 @@ function renderMarkUp(articles) {
     containerNews.insertAdjacentHTML('beforeend', markUp)
 }
 
+function calculateTotalPage(value) {
+	totalPage = Math.floor((value > 100 ? 100 : value) / pageSize);
+	console.log(totalPage);
+}
+
+function clearContainer() {
+	containerNews.innerHTML = '';
+}
+
+
+	

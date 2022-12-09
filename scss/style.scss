@@ -55,3 +55,10 @@ img{
     max-width: 100%;
     height: auto;
 }
+
+.load-button{
+	display: none;
+	&.active{
+		display: block;
+	}
+}
